@@ -1,0 +1,61 @@
+{
+  "repo_url": "https://github.com/manishs2005/sympcheck",
+  "branch_name": "SYMPCHECK_DISHANTH_AI_Fix",
+  "team_name": "sympcheck",
+  "leader_name": "dishanth",
+  "total_failures": 8,
+  "total_fixes": 5,
+  "iterations_used": 1,
+  "ci_status": "PASSED",
+  "time_taken": "0m 10s",
+  "score": {
+    "base": 100,
+    "speed_bonus": 10,
+    "efficiency_penalty": 0,
+    "final_score": 110
+  },
+  "fixes": [
+    {
+      "file": "app.py",
+      "bug_type": "LINTING",
+      "line": 82,
+      "commit_message": "[AI-AGENT] Fixed LINTING in app.py line 82",
+      "status": "Fixed"
+    },
+    {
+      "file": "audio_conversation_service.py",
+      "bug_type": "LINTING",
+      "line": 22,
+      "commit_message": "[AI-AGENT] Fixed LINTING in audio_conversation_service.py line 22",
+      "status": "Fixed"
+    },
+    {
+      "file": "audio_converter.py",
+      "bug_type": "LINTING",
+      "line": 17,
+      "commit_message": "[AI-AGENT] Fixed LINTING in audio_converter.py line 17",
+      "status": "Fixed"
+    },
+    {
+      "file": "azure_speech_service.py",
+      "bug_type": "LINTING",
+      "line": 18,
+      "commit_message": "[AI-AGENT] Fixed LINTING in azure_speech_service.py line 18",
+      "status": "Fixed"
+    },
+    {
+      "file": "conversation_manager.py",
+      "bug_type": "LINTING",
+      "line": 14,
+      "commit_message": "[AI-AGENT] Fixed LINTING in conversation_manager.py line 14",
+      "status": "Fixed"
+    }
+  ],
+  "timeline": [
+    {
+      "iteration": 1,
+      "status": "PASS",
+      "timestamp": "2026-02-19T19:50:28.943638"
+    }
+  ]
+}
