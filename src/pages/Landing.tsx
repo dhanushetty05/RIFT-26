@@ -23,16 +23,8 @@ export default function Landing() {
             </div>
             <div className="flex items-center gap-3">
               <Button
-                variant="ghost"
                 size="sm"
-                onClick={() => navigate("/login")}
-                className="text-white hover:bg-primary/10 smooth-transition"
-              >
-                Login
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/dashboard")}
                 className="btn-primary"
               >
                 Get Started
@@ -68,7 +60,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up">
               <Button
                 size="lg"
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/dashboard")}
                 className="btn-primary text-lg px-8 py-6 w-full sm:w-auto"
               >
                 Start Healing Now
@@ -175,7 +167,7 @@ export default function Landing() {
           </p>
           <Button
             size="lg"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/dashboard")}
             className="btn-primary text-lg px-10 py-6 glow-teal-strong"
           >
             Get Started Free
