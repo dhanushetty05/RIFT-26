@@ -1,11 +1,74 @@
 # 🤖 Autonomous CI/CD Healing Agent
 
-> **Production-ready multi-agent system that automatically detects, classifies, and fixes CI/CD failures using LLM-powered code repair.**
+> **Production-ready multi-agent system with complete Supabase authentication that automatically detects, classifies, and fixes CI/CD failures using LLM-powered code repair.**
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115.0-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react)](https://react.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-Auth-3ECF8E?logo=supabase)](https://supabase.com/)
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)](https://www.docker.com/)
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 20+
+- Python 3.12+
+- Supabase account (free tier)
+
+### 1. Clone & Install
+```bash
+git clone <YOUR_REPO_URL>
+cd <PROJECT_NAME>
+npm install
+```
+
+### 2. Set Up Authentication
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Add your Supabase credentials to .env
+# Get them from: https://supabase.com/dashboard
+```
+
+### 3. Configure Supabase
+Follow the [Quick Start Guide](./AUTH_QUICKSTART.md) or [Full Setup Guide](./SUPABASE_SETUP.md)
+
+### 4. Run Application
+```bash
+# Frontend (React + Vite)
+npm run dev
+
+# Backend (FastAPI)
+cd backend
+python -m uvicorn main:app --reload
+```
+
+Visit:
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+
+---
+
+## 🔐 Authentication System
+
+### Features
+- ✅ Email + Password authentication
+- ✅ Google OAuth
+- ✅ GitHub OAuth
+- ✅ User profiles (name, email, avatar)
+- ✅ Protected routes
+- ✅ Session management
+- ✅ Auto profile creation
+
+### Quick Setup
+See [AUTH_QUICKSTART.md](./AUTH_QUICKSTART.md) for 5-minute setup
+
+### Full Documentation
+See [AUTHENTICATION_SYSTEM.md](./AUTHENTICATION_SYSTEM.md) for complete details
 
 ---
 
