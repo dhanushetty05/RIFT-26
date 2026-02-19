@@ -27,8 +27,19 @@ export interface TimelineEntry {
 export interface Score {
   base: number;
   speed_bonus: number;
+  efficiency_bonus: number;
+  quality_bonus: number;
   efficiency_penalty: number;
   final_score: number;
+  breakdown?: {
+    time_seconds?: number;
+    time_formatted?: string;
+    total_failures?: number;
+    total_fixes?: number;
+    fix_rate?: string;
+    iterations?: number;
+    reason?: string;
+  };
 }
 
 export interface AgentResult {

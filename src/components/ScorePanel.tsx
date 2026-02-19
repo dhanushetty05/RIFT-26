@@ -1,5 +1,5 @@
 import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from "recharts";
-import { Trophy, Zap, Minus } from "lucide-react";
+import { Trophy, Zap, Target, Award, Minus } from "lucide-react";
 import type { Score } from "@/types/agent";
 
 interface Props {
@@ -8,19 +8,22 @@ interface Props {
 }
 
 export default function ScorePanel({ score, iterationsUsed }: Props) {
-  const percentage = Math.min(100, Math.round((score.final_score / 120) * 100));
+  const maxScore = 150;
+  const percentage = Math.min(100, Math.round((score.final_score / maxScore) * 100));
 
   const chartData = [{ value: percentage }];
 
   const getScoreColor = () => {
-    if (score.final_score >= 100) return "#22c55e";
-    if (score.final_score >= 70) return "#f59e0b";
-    return "#ef4444";
+    if (score.final_score >= 120) return "#22c55e"; // Excellent
+    if (score.final_score >= 100) return "#3b82f6"; // Great
+    if (score.final_score >= 80) return "#f59e0b";  // Good
+    return "#ef4444"; // Needs Work
   };
 
   const getScoreLabel = () => {
-    if (score.final_score >= 100) return "Excellent";
-    if (score.final_score >= 70) return "Good";
+    if (score.final_score >= 120) return "Excellent";
+    if (score.final_score >= 100) return "Great";
+    if (score.final_score >= 80) return "Good";
     return "Needs Work";
   };
 
@@ -32,8 +35,8 @@ export default function ScorePanel({ score, iterationsUsed }: Props) {
           <Trophy className="w-4 h-4 text-warning" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold font-mono text-foreground">Score Panel</h2>
-          <p className="text-xs text-muted-foreground">Performance rating</p>
+          <h2 className="text-sm font-semibold font-mono text-foreground">Performance Score</h2>
+          <p className="text-xs text-muted-foreground">Dynamic rating (max 150)</p>
         </div>
       </div>
 
@@ -84,19 +87,43 @@ export default function ScorePanel({ score, iterationsUsed }: Props) {
             value={score.base}
             positive
           />
-          <ScoreRow
-            icon={<Zap className="w-3.5 h-3.5 text-success" />}
-            label="Speed Bonus (<5 min)"
-            value={score.speed_bonus}
-            positive={score.speed_bonus > 0}
-          />
-          <ScoreRow
-            icon={<Minus className="w-3.5 h-3.5 text-danger" />}
-            label={`Efficiency Penalty (${iterationsUsed} iterations)`}
-            value={-score.efficiency_penalty}
-            positive={false}
-            isNegative
-          />
+          
+          {score.speed_bonus > 0 && (
+            <ScoreRow
+              icon={<Zap className="w-3.5 h-3.5 text-success" />}
+              label={`Speed Bonus (${score.breakdown?.time_formatted || 'fast'})`}
+              value={score.speed_bonus}
+              positive
+            />
+          )}
+          
+          {score.efficiency_bonus > 0 && (
+            <ScoreRow
+              icon={<Target className="w-3.5 h-3.5 text-blue-500" />}
+              label={`Efficiency Bonus (${score.breakdown?.total_fixes || 0} fixes)`}
+              value={score.efficiency_bonus}
+              positive
+            />
+          )}
+          
+          {score.quality_bonus > 0 && (
+            <ScoreRow
+              icon={<Award className="w-3.5 h-3.5 text-purple-500" />}
+              label="Quality Bonus"
+              value={score.quality_bonus}
+              positive
+            />
+          )}
+          
+          {score.efficiency_penalty > 0 && (
+            <ScoreRow
+              icon={<Minus className="w-3.5 h-3.5 text-danger" />}
+              label="Efficiency Penalty"
+              value={-score.efficiency_penalty}
+              positive={false}
+              isNegative
+            />
+          )}
 
           <div className="border-t border-border pt-2">
             <div className="flex items-center justify-between">
@@ -122,7 +149,7 @@ export default function ScorePanel({ score, iterationsUsed }: Props) {
             </div>
             <div className="flex justify-between mt-1">
               <span className="text-[10px] text-muted-foreground font-mono">0</span>
-              <span className="text-[10px] text-muted-foreground font-mono">120</span>
+              <span className="text-[10px] text-muted-foreground font-mono">{maxScore}</span>
             </div>
           </div>
         </div>

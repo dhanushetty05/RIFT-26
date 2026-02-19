@@ -20,6 +20,8 @@ from .commit_agent import CommitAgent
 from .ci_tracker_agent import CITrackerAgent
 from utils.git_helper import clone_repo, push_branch
 from utils.project_detector import detect_project_type, install_dependencies, discover_test_files
+from utils.scoring import calculate_score
+import time
 
 
 MAX_ITERATIONS = 5
@@ -40,6 +42,7 @@ class AgentController:
     async def run(self) -> dict[str, Any]:
         """Main pipeline execution with comprehensive error handling."""
         self.work_dir = tempfile.mkdtemp(prefix="ci_healer_")
+        start_time = time.time()
 
         try:
             # PHASE 1: Clone repository
@@ -132,6 +135,16 @@ class AgentController:
                         except Exception as e:
                             print(f"[Pipeline] Push failed: {e}")
                     
+                    # Calculate score
+                    time_elapsed = time.time() - start_time
+                    score = calculate_score(
+                        "PASSED",
+                        iteration,
+                        time_elapsed,
+                        self.total_failures,
+                        self.total_fixes
+                    )
+                    
                     return {
                         "ci_status": "PASSED",
                         "total_failures": self.total_failures,
@@ -139,6 +152,8 @@ class AgentController:
                         "iterations_used": iteration,
                         "fixes": self.fixes,
                         "timeline": self.timeline,
+                        "score": score,
+                        "time_elapsed": time_elapsed,
                     }
 
                 # Tests failed
@@ -201,6 +216,16 @@ class AgentController:
             except Exception as e:
                 print(f"[Pipeline] Push failed: {e}")
         
+        # Calculate score (will be 0 for FAILED)
+        time_elapsed = time.time() - start_time
+        score = calculate_score(
+            "FAILED",
+            MAX_ITERATIONS,
+            time_elapsed,
+            self.total_failures,
+            self.total_fixes
+        )
+        
         return {
             "ci_status": "FAILED",
             "total_failures": self.total_failures,
@@ -208,6 +233,8 @@ class AgentController:
             "iterations_used": MAX_ITERATIONS,
             "fixes": self.fixes,
             "timeline": self.timeline,
+            "score": score,
+            "time_elapsed": time_elapsed,
         }
 
     async def _run_static_analysis(self, repo_path, project_type, analyzer, 
@@ -269,6 +296,16 @@ class AgentController:
         
         status = "PASSED" if self.total_fixes > 0 else "NO_ISSUES"
         
+        # Calculate score
+        time_elapsed = time.time() - start_time
+        score = calculate_score(
+            status,
+            1,
+            time_elapsed,
+            self.total_failures,
+            self.total_fixes
+        )
+        
         return {
             "ci_status": status,
             "total_failures": self.total_failures,
@@ -280,6 +317,8 @@ class AgentController:
                 "status": "PASS" if self.fixes else "NO_TESTS",
                 "timestamp": datetime.utcnow().isoformat(),
             }],
+            "score": score,
+            "time_elapsed": time_elapsed,
         }
 
     async def _analyze_python(self, repo_path, analyzer) -> list:
