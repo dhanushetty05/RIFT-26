@@ -20,6 +20,19 @@ class AnalyzerAgent:
         r"at .+? \((.+?):(\d+):\d+\)|(?:Error|TypeError|SyntaxError):\s+(.+?)(?:\n|$)",
         re.MULTILINE,
     )
+    # Enhanced Node.js patterns
+    NODE_JEST_PATTERN = re.compile(
+        r"●\s+(.+?)\s+›\s+(.+?)\n\s+(.+?):(\d+):(\d+)",
+        re.MULTILINE,
+    )
+    ESLINT_PATTERN = re.compile(
+        r"(.+?):(\d+):(\d+):\s+(error|warning)\s+(.+)",
+        re.MULTILINE,
+    )
+    TYPESCRIPT_PATTERN = re.compile(
+        r"(.+?)\((\d+),(\d+)\):\s+error\s+TS\d+:\s+(.+)",
+        re.MULTILINE,
+    )
     TRACEBACK_FILE_PATTERN = re.compile(r'File "(.+?)", line (\d+)')
     IMPORT_ERROR_PATTERN = re.compile(r"ImportError|ModuleNotFoundError|Cannot find module")
     SYNTAX_ERROR_PATTERN = re.compile(r"SyntaxError|IndentationError")
@@ -30,25 +43,75 @@ class AnalyzerAgent:
         failures = []
         seen = set()
 
-        # Python traceback parsing
-        for match in self.TRACEBACK_FILE_PATTERN.finditer(error_log):
+        # ESLint parsing
+        for match in self.ESLINT_PATTERN.finditer(error_log):
             file_path = match.group(1)
             line_num = int(match.group(2))
+            error_msg = match.group(5)
             key = (file_path, line_num)
 
             if key not in seen:
                 seen.add(key)
-                # Extract the error message around this point
-                start = max(0, match.start() - 50)
-                end = min(len(error_log), match.end() + 200)
-                context = error_log[start:end]
-
                 failures.append({
                     "file": file_path,
                     "line": line_num,
-                    "error_context": context.strip(),
+                    "error_context": error_msg.strip(),
                     "raw_log": error_log,
                 })
+
+        # TypeScript error parsing
+        if not failures:
+            for match in self.TYPESCRIPT_PATTERN.finditer(error_log):
+                file_path = match.group(1)
+                line_num = int(match.group(2))
+                error_msg = match.group(4)
+                key = (file_path, line_num)
+
+                if key not in seen:
+                    seen.add(key)
+                    failures.append({
+                        "file": file_path,
+                        "line": line_num,
+                        "error_context": error_msg.strip(),
+                        "raw_log": error_log,
+                    })
+
+        # Jest error parsing
+        if not failures:
+            for match in self.NODE_JEST_PATTERN.finditer(error_log):
+                file_path = match.group(3)
+                line_num = int(match.group(4))
+                key = (file_path, line_num)
+
+                if key not in seen:
+                    seen.add(key)
+                    failures.append({
+                        "file": file_path,
+                        "line": line_num,
+                        "error_context": f"{match.group(1)} › {match.group(2)}",
+                        "raw_log": error_log,
+                    })
+
+        # Python traceback parsing
+        if not failures:
+            for match in self.TRACEBACK_FILE_PATTERN.finditer(error_log):
+                file_path = match.group(1)
+                line_num = int(match.group(2))
+                key = (file_path, line_num)
+
+                if key not in seen:
+                    seen.add(key)
+                    # Extract the error message around this point
+                    start = max(0, match.start() - 50)
+                    end = min(len(error_log), match.end() + 200)
+                    context = error_log[start:end]
+
+                    failures.append({
+                        "file": file_path,
+                        "line": line_num,
+                        "error_context": context.strip(),
+                        "raw_log": error_log,
+                    })
 
         # Node.js error parsing
         if not failures:
@@ -69,7 +132,7 @@ class AnalyzerAgent:
         # Fallback: generic line-by-line scan
         if not failures:
             for i, line in enumerate(error_log.splitlines()):
-                if any(kw in line for kw in ["Error:", "FAILED", "FAIL:", "error TS"]):
+                if any(kw in line for kw in ["Error:", "FAILED", "FAIL:", "error TS", "✕", "✗"]):
                     failures.append({
                         "file": "unknown",
                         "line": i + 1,

@@ -37,9 +37,10 @@ class ExecutorAgent:
                 return ["python", "-m", "pytest", "--tb=short", "-v"] + test_files
             return ["python", "-m", "pytest", "--tb=short", "-v"]
         elif self.project_type == "node":
-            return ["npm", "test", "--", "--passWithNoTests"]
+            # Try to run npm test with verbose output
+            return ["npm", "test", "--", "--verbose", "--no-coverage"]
         elif self.project_type == "node_yarn":
-            return ["yarn", "test", "--passWithNoTests"]
+            return ["yarn", "test", "--verbose", "--no-coverage"]
         return ["echo", "No test runner configured"]
 
     def parse_test_output(self, output: str) -> tuple[bool, str]:
@@ -54,14 +55,23 @@ class ExecutorAgent:
         if "no tests ran" in lower or "passed" in lower and "failed" not in lower:
             return True, ""
 
-        # Node Jest / Mocha
-        if "test suites: 0 failed" in lower or "passing" in lower and "failing" not in lower:
+        # Node Jest / Mocha - improved detection
+        if "test suites: 0 failed" in lower and "tests: 0 failed" in lower:
+            return True, ""
+        if "passing" in lower and "failing" not in lower and "0 failing" in lower:
             return True, ""
         if "all tests passed" in lower:
             return True, ""
+        
+        # Check for failures
+        if "failed" in lower or "failing" in lower or "error" in lower:
+            # But not if it's just warnings
+            if "0 failed" in lower or "0 failing" in lower:
+                return True, ""
+            return False, output
 
         # Exit code 0 heuristic
-        if output.strip().endswith("0") or "0 failed" in lower:
+        if "0 failed" in lower:
             return True, ""
 
         return False, output
